@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHAOSOS — WebOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Permanent+Marker&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --punk-bg: #0a0a0a;
+    --neon-pink: #ff2d78;
+    --neon-yellow: #ffe600;
+    --neon-cyan: #00f5ff;
+    --neon-green: #39ff14;
+    --neon-purple: #bf00ff;
+    --neon-orange: #ff6a00;
+    --dirty-white: #e8e0d0;
+    --font-display: 'Permanent Marker', cursive;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--punk-bg);
+    color: var(--dirty-white);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  
+  #wallpaper {
+    position: fixed; inset: 0;
+    background: var(--punk-bg);
+    z-index: 0;
+  }
+
+  #wallpaper canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+
+  
+  #taskbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(10,10,10,0.92);
+    border-top: 2px solid var(--neon-pink);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+    z-index: 9999;
+    box-shadow: 0 -4px 30px rgba(255,45,120,0.3);
+  }
+
+  #taskbar-brand {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--neon-yellow);
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--neon-yellow), 2px 2px 0 var(--neon-orange);
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+
+  .taskbar-btn {
+    background: none;
+    border: 1.5px solid;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .taskbar-btn:hover { transform: translateY(-2px); filter: brightness(1.3); }
+  .taskbar-btn:active { transform: scale(0.95); }
+  .taskbar-btn.pink { color: var(--neon-pink); border-color: var(--neon-pink); }
+  .taskbar-btn.cyan { color: var(--neon-cyan); border-color: var(--neon-cyan); }
+  .taskbar-btn.green { color: var(--neon-green); border-color: var(--neon-green); }
+  .taskbar-btn.purple { color: var(--neon-purple); border-color: var(--neon-purple); }
+  .taskbar-btn.yellow { color: var(--neon-yellow); border-color: var(--neon-yellow); }
+  .taskbar-btn.active { background: rgba(255,255,255,0.1); }
+
+  #clock {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px var(--neon-cyan);
+  }
+
+  
+  #desktop {
+    position: fixed; inset: 0;
+    bottom: 52px;
+    z-index: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 16px;
+  }
+
+  .desktop-icon {
+    width: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .desktop-icon:hover { transform: scale(1.1) rotate(-2deg); }
+  .desktop-icon:active { transform: scale(0.95); }
+
+  .icon-img {
+    width: 48px; height: 48px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .icon-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-align: center;
+    color: var(--dirty-white);
+    text-shadow: 1px 1px 3px black, -1px -1px 3px black;
+    line-height: 1.3;
+  }
+
+  
+  .window {
+    position: absolute;
+    min-width: 320px;
+    min-height: 200px;
+    background: #111;
+    border: 2px solid;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    transition: box-shadow 0.2s;
+    animation: windowPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes windowPop {
+    from { transform: scale(0.85) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .window.focused { z-index: 200; }
+
+  .window-titlebar {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+    cursor: grab;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .window-titlebar:active { cursor: grabbing; }
+
+  .win-controls {
+    display: flex; gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .win-btn {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.1s;
+    flex-shrink: 0;
+  }
+  .win-btn:hover { transform: scale(1.2); filter: brightness(1.4); }
+  .win-btn.close { background: var(--neon-pink); }
+  .win-btn.minimize { background: var(--neon-yellow); }
+  .win-btn.maximize { background: var(--neon-green); }
+
+  .window-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    flex: 1;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .window-body {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .window-body::-webkit-scrollbar { width: 4px; }
+  .window-body::-webkit-scrollbar-track { background: transparent; }
+  .window-body::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 2px; }
+
+  /* Resize handle */
+  .resize-handle {
+    position: absolute;
+    right: 0; bottom: 0;
+    width: 16px; height: 16px;
+    cursor: se-resize;
+    opacity: 0.5;
+  }
+  .resize-handle::after {
+    content: '';
+    position: absolute;
+    right: 3px; bottom: 3px;
+    width: 8px; height: 8px;
+    border-right: 2px solid rgba(255,255,255,0.5);
+    border-bottom: 2px solid rgba(255,255,255,0.5);
+  }
+
+  .app-notepad textarea {
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    resize: none;
+    line-height: 1.8;
+  }
+
+  
+  .app-music {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .music-art {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--neon-pink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    animation: spin 8s linear infinite paused;
+    box-shadow: 0 0 30px rgba(255,45,120,0.5);
+  }
+  .music-art.playing { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .music-title { font-family: var(--font-display); font-size: 18px; color: var(--neon-yellow); text-align: center; }
+  .music-artist { font-family: var(--font-mono); font-size: 12px; color: rgba(255,255,255,0.5); }
+  .music-controls { display: flex; gap: 16px; align-items: center; }
+  .music-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 24px; color: var(--dirty-white);
+    transition: transform 0.1s, color 0.1s;
+  }
+  .music-btn:hover { transform: scale(1.2); color: var(--neon-pink); }
+  .music-play {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--neon-pink);
+    border: none; cursor: pointer;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    color: black;
+    transition: transform 0.1s;
+    box-shadow: 0 0 20px rgba(255,45,120,0.6);
+  }
+  .music-play:hover { transform: scale(1.1); }
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--neon-pink);
+    border-radius: 2px;
+    width: 30%;
+    box-shadow: 0 0 8px var(--neon-pink);
+    transition: width 0.5s linear;
+  }
+
+
+  .app-paint { display: flex; flex-direction: column; gap: 8px; }
+  .paint-toolbar {
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .color-swatch {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s, border-color 0.1s;
+  }
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.selected { border-color: white; }
+  #paint-canvas {
+    border-radius: 4px;
+    cursor: crosshair;
+    display: block;
+    background: #1a1a1a;
+  }
+  .paint-size {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .paint-size input { width: 60px; accent-color: var(--neon-pink); }
+
+  
+  .app-terminal {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--neon-green);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 8px;
+    min-height: 200px;
+    max-height: 280px;
+  }
+  .terminal-output::-webkit-scrollbar { width: 3px; }
+  .terminal-output::-webkit-scrollbar-thumb { background: var(--neon-green); }
+  .terminal-line { line-height: 1.8; }
+  .terminal-line.cmd { color: var(--neon-cyan); }
+  .terminal-line.err { color: var(--neon-pink); }
+  .terminal-line.sys { color: var(--neon-yellow); }
+  .terminal-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(0,255,0,0.2);
+    padding-top: 8px;
+  }
+  .terminal-prompt { color: var(--neon-pink); flex-shrink: 0; }
+  .terminal-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+
+  .app-devlog { display: flex; flex-direction: column; gap: 12px; }
+  .devlog-entry {
+    padding: 12px;
+    border-left: 3px solid;
+    background: rgba(255,255,255,0.03);
+    border-radius: 0 4px 4px 0;
+  }
+  .devlog-date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+  }
+  .devlog-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .devlog-body {
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+  }
+  .devlog-add {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    border: 1px dashed rgba(255,255,255,0.2);
+  }
+  .devlog-add input, .devlog-add textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 8px;
+    color: var(--dirty-white);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+  }
+  .devlog-add textarea { resize: vertical; min-height: 60px; }
+  .devlog-save {
+    background: var(--neon-cyan);
+    color: black;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    align-self: flex-end;
+    font-weight: 700;
+    transition: transform 0.1s;
+  }
+  .devlog-save:hover { transform: scale(1.05); }
+
+  /* ABOUT */
+  .app-about {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .about-logo {
+    font-family: var(--font-display);
+    font-size: 48px;
+    color: var(--neon-yellow);
+    text-shadow: 3px 3px 0 var(--neon-orange), 6px 6px 0 rgba(255,106,0,0.3);
+    line-height: 1;
+  }
+  .about-version {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+  }
+  .about-desc {
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.6);
+    max-width: 260px;
+  }
+  .about-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin: 2px;
+  }
+
+  
+  .spray-dot {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 99998;
+    animation: fadeOut 0.8s ease forwards;
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.3); }
+  }
+
+  
+  .notification {
+    position: fixed;
+    bottom: 64px;
+    right: 16px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    z-index: 99999;
+    animation: notifSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    border: 1px solid;
+    max-width: 280px;
+  }
+  @keyframes notifSlide {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .notification.out {
+    animation: notifOut 0.2s ease forwards;
+  }
+  @keyframes notifOut {
+    to { transform: translateX(120%); opacity: 0; }
+  }
+
+  
+  @keyframes glitch {
+    0%, 100% { text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-cyan); }
+    25% { text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-cyan); }
+    50% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+    75% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
+  }
+
+  .glitch { animation: glitch 2s infinite; }
+
+  
+  .window-body { user-select: text; }
+
+  
+  #start-menu {
+    position: fixed;
+    bottom: 60px;
+    left: 16px;
+    width: 220px;
+    background: rgba(10,10,10,0.97);
+    border: 2px solid var(--neon-pink);
+    border-radius: 8px;
+    padding: 12px;
+    z-index: 99998;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 0 40px rgba(255,45,120,0.3);
+    animation: windowPop 0.15s ease;
+  }
+  #start-menu.visible { display: flex; }
+  .start-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    transition: background 0.1s;
+    color: var(--dirty-white);
+  }
+  .start-item:hover { background: rgba(255,255,255,0.07); }
+  .start-item span { font-size: 18px; }
+  #start-menu-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--neon-yellow);
+    padding: 4px 12px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+
+<div id="wallpaper"><canvas id="bg-canvas"></canvas></div>
+
+
+<div id="desktop"></div>
+
+
+<div id="start-menu">
+  <div id="start-menu-title">CHAOSOS</div>
+</div>
+
+<div id="taskbar">
+  <span id="taskbar-brand">⚡ CHAOSOS</span>
+  <button class="taskbar-btn pink" id="start-btn">▤ APPS</button>
+  <div id="taskbar-windows" style="display:flex;gap:6px;flex:1;overflow:hidden;"></div>
+  <div id="clock">00:00:00</div>
+</div>
+
+<script>
+
+let windowZ = 200;
+let activeWindow = null;
+const openWindows = {};
+let musicPlaying = false;
+let musicTrack = 0;
+const tracks = [
+  { title: 'Static Discharge', artist: 'Circuit Breaker', emoji: '⚡' },
+  { title: 'Neon Vandal', artist: 'The Spraycans', emoji: '🎨' },
+  { title: 'Concrete Dreams', artist: 'Urban Decay', emoji: '🏙️' },
+  { title: 'Frequency Punk', artist: 'Glitch Sisters', emoji: '📡' },
+];
+let paintColor = '#ff2d78';
+let paintSize = 8;
+let isPainting = false;
+let lastX, lastY;
+let musicInterval = null;
+let musicProgress = 30;
+
+
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let W, H;
+const particles = [];
+const NEONS = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff','#ff6a00'];
+
+function resizeBg() {
+  W = bgCanvas.width = window.innerWidth;
+  H = bgCanvas.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+
+const graffLines = [];
+for (let i = 0; i < 18; i++) {
+  graffLines.push({
+    x: Math.random() * 1.2 - 0.1,
+    y: Math.random() * 1.2 - 0.1,
+    angle: Math.random() * Math.PI,
+    len: 0.05 + Math.random() * 0.25,
+    color: NEONS[Math.floor(Math.random() * NEONS.length)],
+    alpha: 0.03 + Math.random() * 0.07,
+    width: 1 + Math.random() * 60,
+  });
+}
+
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * 1, y: Math.random() * 1,
+    vx: (Math.random() - 0.5) * 0.0003,
+    vy: (Math.random() - 0.5) * 0.0003,
+    r: 1 + Math.random() * 2,
+    color: NEONS[Math.floor(Math.random() * NEONS.length)],
+    alpha: 0.3 + Math.random() * 0.5,
+  });
+}
+
+function drawBg() {
+  bgCtx.clearRect(0, 0, W, H);
+  bgCtx.fillStyle = '#0a0a0a';
+  bgCtx.fillRect(0, 0, W, H);
+
+ 
+  bgCtx.strokeStyle = 'rgba(255,255,255,0.03)';
+  bgCtx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) {
+    bgCtx.beginPath(); bgCtx.moveTo(x, 0); bgCtx.lineTo(x, H); bgCtx.stroke();
+  }
+  for (let y = 0; y < H; y += 40) {
+    bgCtx.beginPath(); bgCtx.moveTo(0, y); bgCtx.lineTo(W, y); bgCtx.stroke();
+  }
+
+  
+  graffLines.forEach(l => {
+    bgCtx.save();
+    bgCtx.globalAlpha = l.alpha;
+    bgCtx.strokeStyle = l.color;
+    bgCtx.lineWidth = l.width;
+    bgCtx.lineCap = 'round';
+    bgCtx.shadowColor = l.color;
+    bgCtx.shadowBlur = 20;
+    const cx = l.x * W, cy = l.y * H;
+    const len = l.len * Math.min(W, H);
+    bgCtx.beginPath();
+    bgCtx.moveTo(cx - Math.cos(l.angle) * len / 2, cy - Math.sin(l.angle) * len / 2);
+    bgCtx.lineTo(cx + Math.cos(l.angle) * len / 2, cy + Math.sin(l.angle) * len / 2);
+    bgCtx.stroke();
+    bgCtx.restore();
+  });
+
+    particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+    if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+    bgCtx.save();
+    bgCtx.globalAlpha = p.alpha;
+    bgCtx.fillStyle = p.color;
+    bgCtx.shadowColor = p.color;
+    bgCtx.shadowBlur = 6;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+    bgCtx.fill();
+    bgCtx.restore();
+  });
+
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+
+function notify(msg, color = '#00f5ff') {
+  const el = document.createElement('div');
+  el.className = 'notification';
+  el.textContent = msg;
+  el.style.background = 'rgba(10,10,10,0.95)';
+  el.style.color = color;
+  el.style.borderColor = color;
+  el.style.boxShadow = `0 0 20px ${color}40`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+
+
+function createWindow(id, title, content, opts = {}) {
+  if (openWindows[id]) {
+    focusWindow(id); return;
+  }
+  const win = document.createElement('div');
+  win.className = 'window';
+  win.id = 'win-' + id;
+  win.style.borderColor = opts.color || '#ff2d78';
+  win.style.boxShadow = `0 0 30px ${opts.color || '#ff2d78'}33`;
+  win.style.left = (100 + Math.random() * 200) + 'px';
+  win.style.top = (60 + Math.random() * 100) + 'px';
+  win.style.width = (opts.width || 400) + 'px';
+  win.style.height = (opts.height || 320) + 'px';
+
+  win.innerHTML = `
+    <div class="window-titlebar" style="background: ${opts.color || '#ff2d78'}22;">
+      <div class="win-controls">
+        <button class="win-btn close" title="Close"></button>
+        <button class="win-btn minimize" title="Minimize"></button>
+        <button class="win-btn maximize" title="Maximize"></button>
+      </div>
+      <div class="window-title">${title}</div>
+    </div>
+    <div class="window-body">${content}</div>
+    <div class="resize-handle"></div>
+  `;
+
+  document.body.appendChild(win);
+  focusWindow(id);
+
+  
+  win.querySelector('.close').addEventListener('click', () => closeWindow(id));
+  win.querySelector('.minimize').addEventListener('click', () => minimizeWindow(id, win));
+  win.querySelector('.maximize').addEventListener('click', () => maximizeWindow(id, win));
+
+  openWindows[id] = { el: win, minimized: false, opts };
+  makeDraggable(win);
+  makeResizable(win);
+  addToTaskbar(id, title, opts.color || '#ff2d78');
+  if (opts.onOpen) opts.onOpen(win);
+}
+
+function focusWindow(id) {
+  if (openWindows[id]) {
+    windowZ++;
+    openWindows[id].el.style.zIndex = windowZ;
+    openWindows[id].el.classList.add('focused');
+    if (activeWindow && activeWindow !== id && openWindows[activeWindow]) {
+      openWindows[activeWindow].el.classList.remove('focused');
+    }
+    activeWindow = id;
+  }
+}
+
+function closeWindow(id) {
+  if (!openWindows[id]) return;
+  const el = openWindows[id].el;
+  el.style.animation = 'windowPop 0.15s ease reverse forwards';
+  setTimeout(() => { el.remove(); }, 150);
+  delete openWindows[id];
+  removeFromTaskbar(id);
+}
+
+function minimizeWindow(id, win) {
+  if (openWindows[id].minimized) {
+    win.style.display = 'flex';
+    openWindows[id].minimized = false;
+  } else {
+    win.style.display = 'none';
+    openWindows[id].minimized = true;
+  }
+}
+
+let maximizedState = {};
+function maximizeWindow(id, win) {
+  if (maximizedState[id]) {
+    const s = maximizedState[id];
+    win.style.left = s.left; win.style.top = s.top;
+    win.style.width = s.width; win.style.height = s.height;
+    delete maximizedState[id];
+  } else {
+    maximizedState[id] = { left: win.style.left, top: win.style.top, width: win.style.width, height: win.style.height };
+    win.style.left = '0'; win.style.top = '0';
+    win.style.width = '100vw'; win.style.height = 'calc(100vh - 52px)';
+  }
+}
+
+function addToTaskbar(id, title, color) {
+  const btn = document.createElement('button');
+  btn.className = 'taskbar-btn';
+  btn.style.color = color; btn.style.borderColor = color;
+  btn.style.fontSize = '11px'; btn.style.maxWidth = '120px';
+  btn.style.overflow = 'hidden'; btn.style.textOverflow = 'ellipsis';
+  btn.textContent = title;
+  btn.id = 'tbtn-' + id;
+  btn.addEventListener('click', () => {
+    if (openWindows[id]) {
+      if (openWindows[id].minimized) { minimizeWindow(id, openWindows[id].el); }
+      focusWindow(id);
+    }
+  });
+  document.getElementById('taskbar-windows').appendChild(btn);
+}
+
+function removeFromTaskbar(id) {
+  const btn = document.getElementById('tbtn-' + id);
+  if (btn) btn.remove();
+}
+
+
+function makeDraggable(win) {
+  const titlebar = win.querySelector('.window-titlebar');
+  let dragging = false, startX, startY, startLeft, startTop;
+
+  titlebar.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('win-btn')) return;
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    startLeft = parseInt(win.style.left) || 0;
+    startTop = parseInt(win.style.top) || 0;
+    focusWindow(win.id.replace('win-', ''));
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    const newLeft = Math.max(0, Math.min(window.innerWidth - 50, startLeft + dx));
+    const newTop = Math.max(0, Math.min(window.innerHeight - 80, startTop + dy));
+    win.style.left = newLeft + 'px';
+    win.style.top = newTop + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { dragging = false; });
+
+  win.addEventListener('mousedown', () => {
+    focusWindow(win.id.replace('win-', ''));
+  });
+}
+
+
+function makeResizable(win) {
+  const handle = win.querySelector('.resize-handle');
+  let resizing = false, startX, startY, startW, startH;
+
+  handle.addEventListener('mousedown', e => {
+    resizing = true;
+    startX = e.clientX; startY = e.clientY;
+    startW = win.offsetWidth; startH = win.offsetHeight;
+    e.preventDefault(); e.stopPropagation();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!resizing) return;
+    win.style.width = Math.max(280, startW + e.clientX - startX) + 'px';
+    win.style.height = Math.max(200, startH + e.clientY - startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { resizing = false; });
+}
+
+function openNotepad() {
+  const content = `<div class="app-notepad"><textarea placeholder="// write your thoughts here...\n// no one's watching 👀\n\n" spellcheck="false"></textarea></div>`;
+  createWindow('notepad', '✏️ NOTEPAD.exe', content, { color: '#39ff14', width: 420, height: 300 });
+}
+
+// --- TERMINAL ---
+const terminalHistory = [
+  { type: 'sys', text: '██████████████████████████████' },
+  { type: 'sys', text: '  CHAOSOS v1.0 — system boot' },
+  { type: 'sys', text: '  all systems unstable (normal)' },
+  { type: 'sys', text: '██████████████████████████████' },
+  { type: '', text: '' },
+  { type: 'cmd', text: '> type "help" for commands' },
+];
+const terminalCmds = {
+  help: () => [
+    { type: '', text: 'available commands:' },
+    { type: 'cmd', text: '  hello     — say hi' },
+    { type: 'cmd', text: '  clear     — clear screen' },
+    { type: 'cmd', text: '  joke      — get a punk joke' },
+    { type: 'cmd', text: '  date      — current date' },
+    { type: 'cmd', text: '  matrix    — go deeper' },
+    { type: 'cmd', text: '  graffiti  — art mode' },
+  ],
+  hello: () => [{ type: '', text: 'hey. what\'s up. cool system.' }],
+  date: () => [{ type: '', text: new Date().toString() }],
+  joke: () => {
+    const jokes = [
+      'why do punks love linux? no corporate bs',
+      'how many devs to change a bulb? none, its a feature',
+      'error 404: chill not found',
+    ];
+    return [{ type: '', text: jokes[Math.floor(Math.random() * jokes.length)] }];
+  },
+  matrix: () => {
+    notify('you take the red pill...', '#39ff14');
+    return [{ type: 'sys', text: 'reality.exe has stopped responding' }];
+  },
+  graffiti: () => {
+    openPaint();
+    return [{ type: 'sys', text: 'opening spray cans...' }];
+  },
+};
+
+function openTerminal() {
+  const id = 'terminal';
+  const content = `
+    <div class="app-terminal">
+      <div class="terminal-output" id="term-output"></div>
+      <div class="terminal-input-row">
+        <span class="terminal-prompt">chaos@os:~$</span>
+        <input class="terminal-input" id="term-input" autocomplete="off" spellcheck="false" />
+      </div>
+    </div>`;
+  createWindow(id, '💀 TERMINAL', content, {
+    color: '#39ff14', width: 460, height: 360,
+    onOpen: (win) => {
+      const output = win.querySelector('#term-output');
+      const input = win.querySelector('#term-input');
+      terminalHistory.forEach(l => appendTermLine(output, l.text, l.type));
+      input.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        const cmd = input.value.trim().toLowerCase();
+        appendTermLine(output, `chaos@os:~$ ${cmd}`, 'cmd');
+        if (cmd === 'clear') { output.innerHTML = ''; }
+        else if (terminalCmds[cmd]) { terminalCmds[cmd]().forEach(l => appendTermLine(output, l.text, l.type)); }
+        else if (cmd) { appendTermLine(output, `command not found: ${cmd}`, 'err'); }
+        input.value = '';
+        output.scrollTop = output.scrollHeight;
+      });
+    }
+  });
+}
+
+function appendTermLine(container, text, type = '') {
+  const div = document.createElement('div');
+  div.className = 'terminal-line' + (type ? ' ' + type : '');
+  div.textContent = text;
+  container.appendChild(div);
+}
+
+
+function openPaint() {
+  const colors = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff','#ff6a00','#ffffff','#000000'];
+  const swatches = colors.map(c => `<div class="color-swatch${c === paintColor ? ' selected' : ''}" style="background:${c}" data-color="${c}"></div>`).join('');
+  const content = `
+    <div class="app-paint">
+      <div class="paint-toolbar">
+        ${swatches}
+        <div class="paint-size">
+          size <input type="range" min="2" max="40" value="8" id="paint-size-slider" style="width:70px">
+          <span id="paint-size-val">8</span>px
+        </div>
+        <button onclick="document.getElementById('paint-canvas').getContext('2d').clearRect(0,0,9999,9999)" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-mono)">clear</button>
+      </div>
+      <canvas id="paint-canvas" width="360" height="240"></canvas>
+    </div>`;
+  createWindow('paint', '🎨 SPRAY PAINT', content, {
+    color: '#bf00ff', width: 420, height: 360,
+    onOpen: (win) => {
+      const canvas = win.querySelector('#paint-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   
+      const resizeCanvas = () => {
+        const body = win.querySelector('.window-body');
+        const toolbar = win.querySelector('.paint-toolbar');
+        const newW = body.clientWidth - 32;
+        const newH = body.clientHeight - toolbar.offsetHeight - 32;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        canvas.width = Math.max(200, newW);
+        canvas.height = Math.max(100, newH);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imageData, 0, 0);
+      };
+      setTimeout(resizeCanvas, 100);
+
+      
+      win.querySelectorAll('.color-swatch').forEach(sw => {
+        sw.addEventListener('click', () => {
+          win.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+          sw.classList.add('selected');
+          paintColor = sw.dataset.color;
+        });
+      });
+
+      
+      const slider = win.querySelector('#paint-size-slider');
+      const sizeVal = win.querySelector('#paint-size-val');
+      slider.addEventListener('input', () => {
+        paintSize = parseInt(slider.value);
+        sizeVal.textContent = paintSize;
+      });
+
+      
+      const getPos = e => {
+        const rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      };
+      canvas.addEventListener('mousedown', e => {
+        isPainting = true;
+        const pos = getPos(e);
+        lastX = pos.x; lastY = pos.y;
+      });
+      canvas.addEventListener('mousemove', e => {
+        if (!isPainting) return;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = paintColor;
+        ctx.lineWidth = paintSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = paintColor;
+        ctx.shadowBlur = paintSize * 0.5;
+        ctx.stroke();
+        lastX = pos.x; lastY = pos.y;
+      });
+      canvas.addEventListener('mouseup', () => { isPainting = false; });
+      canvas.addEventListener('mouseleave', () => { isPainting = false; });
+    }
+  });
+}
+
+
+function openMusic() {
+  const t = tracks[musicTrack];
+  const content = `
+    <div class="app-music">
+      <div class="music-art" id="music-art">${t.emoji}</div>
+      <div>
+        <div class="music-title" id="music-title">${t.title}</div>
+        <div class="music-artist" id="music-artist">${t.artist}</div>
+      </div>
+      <div class="progress-bar" id="music-progress-bar">
+        <div class="progress-fill" id="music-fill" style="width:30%"></div>
+      </div>
+      <div class="music-controls">
+        <button class="music-btn" id="music-prev">⏮</button>
+        <button class="music-play" id="music-play-btn">▶</button>
+        <button class="music-btn" id="music-next">⏭</button>
+      </div>
+    </div>`;
+  createWindow('music', '🎵 MUSIC PLAYER', content, {
+    color: '#ffe600', width: 320, height: 360,
+    onOpen: (win) => {
+      const playBtn = win.querySelector('#music-play-btn');
+      const art = win.querySelector('#music-art');
+      const fill = win.querySelector('#music-fill');
+
+      playBtn.addEventListener('click', () => {
+        musicPlaying = !musicPlaying;
+        playBtn.textContent = musicPlaying ? '⏸' : '▶';
+        if (musicPlaying) {
+          art.classList.add('playing');
+          musicInterval = setInterval(() => {
+            musicProgress = (musicProgress + 0.5) % 100;
+            fill.style.width = musicProgress + '%';
+          }, 100);
+          notify(`now playing: ${tracks[musicTrack].title}`, '#ffe600');
+        } else {
+          art.classList.remove('playing');
+          clearInterval(musicInterval);
+        }
+      });
+
+      const changeTrack = (dir) => {
+        musicTrack = (musicTrack + dir + tracks.length) % tracks.length;
+        const t = tracks[musicTrack];
+        win.querySelector('#music-title').textContent = t.title;
+        win.querySelector('#music-artist').textContent = t.artist;
+        art.textContent = t.emoji;
+        musicProgress = 0;
+        if (musicPlaying) notify(`now playing: ${t.title}`, '#ffe600');
+      };
+
+      win.querySelector('#music-prev').addEventListener('click', () => changeTrack(-1));
+      win.querySelector('#music-next').addEventListener('click', () => changeTrack(1));
+    }
+  });
+}
+
+
+let devlogs = [
+  { date: '2025-06-01', title: 'initial commit 🔥', body: 'Started building CHAOSOS. Got basic window dragging working. The vibe is immaculate.', color: '#ff2d78' },
+  { date: '2025-06-05', title: 'spray paint feature', body: 'Added the paint app with neon brushes. You can actually make proper graffiti now. Wild.', color: '#bf00ff' },
+  { date: '2025-06-09', title: 'music player + polish', body: 'Hooked up the music player. Added glitch animations. This thing is alive.', color: '#00f5ff' },
+];
+
+function openDevlog() {
+  function renderDevlog() {
+    return `
+      <div class="app-devlog">
+        ${devlogs.map((d, i) => `
+          <div class="devlog-entry" style="border-color:${d.color}">
+            <div class="devlog-date">${d.date}</div>
+            <div class="devlog-title" style="color:${d.color}">${d.title}</div>
+            <div class="devlog-body">${d.body}</div>
+          </div>
+        `).join('')}
+        <div class="devlog-add">
+          <input type="text" id="devlog-new-title" placeholder="log title..." />
+          <textarea id="devlog-new-body" placeholder="what happened today..."></textarea>
+          <button class="devlog-save" id="devlog-save-btn">+ ADD LOG</button>
+        </div>
+      </div>`;
+  }
+
+  createWindow('devlog', '📓 DEVLOG', renderDevlog(), {
+    color: '#00f5ff', width: 420, height: 400,
+    onOpen: (win) => {
+      win.querySelector('#devlog-save-btn').addEventListener('click', () => {
+        const title = win.querySelector('#devlog-new-title').value.trim();
+        const body = win.querySelector('#devlog-new-body').value.trim();
+        if (!title || !body) { notify('fill in both fields!', '#ff2d78'); return; }
+        const colors = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff'];
+        devlogs.push({
+          date: new Date().toISOString().slice(0, 10),
+          title, body,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+        win.querySelector('.window-body').innerHTML = renderDevlog();
+        // re-bind
+        win.querySelector('#devlog-save-btn').addEventListener('click', arguments.callee);
+        notify('log saved! ✅', '#39ff14');
+      });
+    }
+  });
+}
+
+
+function openAbout() {
+  const content = `
+    <div class="app-about">
+      <div class="about-logo">CHAOSOS</div>
+      <div class="about-version">v1.0.0 — WebOS for the restless</div>
+      <div class="about-desc">
+        Built in the gutter, runs in your browser. No passwords. No rules. Just windows, spray cans, and good music.
+      </div>
+      <div>
+        <span class="about-tag" style="background:#ff2d7822;color:#ff2d78;border:1px solid #ff2d78">draggable windows</span>
+        <span class="about-tag" style="background:#ffe60022;color:#ffe600;border:1px solid #ffe600">music player</span>
+        <span class="about-tag" style="background:#00f5ff22;color:#00f5ff;border:1px solid #00f5ff">devlogs</span>
+        <span class="about-tag" style="background:#39ff1422;color:#39ff14;border:1px solid #39ff14">terminal</span>
+        <span class="about-tag" style="background:#bf00ff22;color:#bf00ff;border:1px solid #bf00ff">spray paint</span>
+        <span class="about-tag" style="background:#ff6a0022;color:#ff6a00;border:1px solid #ff6a00">notepad</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px">
+        made with ⚡ and zero corporate energy
+      </div>
+    </div>`;
+  createWindow('about', '💥 ABOUT CHAOSOS', content, {
+    color: '#ff6a00', width: 340, height: 380
+  });
+}
+
+
+const desktopApps = [
+  { id: 'notepad', label: 'NOTEPAD', emoji: '✏️', color: '#39ff14', open: openNotepad },
+  { id: 'terminal', label: 'TERMINAL', emoji: '💀', color: '#39ff14', open: openTerminal },
+  { id: 'paint', label: 'SPRAY\nPAINT', emoji: '🎨', color: '#bf00ff', open: openPaint },
+  { id: 'music', label: 'MUSIC\nPLAYR', emoji: '🎵', color: '#ffe600', open: openMusic },
+  { id: 'devlog', label: 'DEVLOG', emoji: '📓', color: '#00f5ff', open: openDevlog },
+  { id: 'about', label: 'ABOUT', emoji: '💥', color: '#ff6a00', open: openAbout },
+];
+
+const desktop = document.getElementById('desktop');
+desktopApps.forEach(app => {
+  const icon = document.createElement('div');
+  icon.className = 'desktop-icon';
+  icon.innerHTML = `
+    <div class="icon-img" style="background:${app.color}22;border-color:${app.color};box-shadow:0 0 12px ${app.color}44">
+      <span style="font-size:24px">${app.emoji}</span>
+    </div>
+    <div class="icon-label">${app.label}</div>`;
+  icon.addEventListener('dblclick', app.open);
+  icon.addEventListener('click', () => {
+    desktop.querySelectorAll('.desktop-icon').forEach(i => i.style.outline = 'none');
+    icon.style.outline = `1px solid ${app.color}`;
+  });
+  desktop.appendChild(icon);
+});
+
+
+const startMenu = document.getElementById('start-menu');
+desktopApps.forEach(app => {
+  const item = document.createElement('div');
+  item.className = 'start-item';
+  item.innerHTML = `<span>${app.emoji}</span>${app.label}`;
+  item.style.color = app.color;
+  item.addEventListener('click', () => { app.open(); startMenu.classList.remove('visible'); });
+  startMenu.appendChild(item);
+});
+
+document.getElementById('start-btn').addEventListener('click', (e) => {
+  startMenu.classList.toggle('visible');
+  e.stopPropagation();
+});
+document.addEventListener('click', () => startMenu.classList.remove('visible'));
+
+
+setTimeout(() => notify('CHAOSOS booted. stay chaotic ⚡', '#ffe600'), 500);
+setTimeout(() => notify('double-click icons to open apps', '#00f5ff'), 1800);
+
+</script>
+</body>
+</html>
