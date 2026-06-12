@@ -32,7 +32,6 @@
     user-select: none;
   }
 
-  
   #wallpaper {
     position: fixed; inset: 0;
     background: var(--punk-bg);
@@ -44,7 +43,6 @@
     width: 100%; height: 100%;
   }
 
-  
   #taskbar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -99,7 +97,6 @@
     text-shadow: 0 0 8px var(--neon-cyan);
   }
 
-  
   #desktop {
     position: fixed; inset: 0;
     bottom: 52px;
@@ -144,7 +141,6 @@
     line-height: 1.3;
   }
 
-  
   .window {
     position: absolute;
     min-width: 320px;
@@ -218,7 +214,6 @@
   .window-body::-webkit-scrollbar-track { background: transparent; }
   .window-body::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 2px; }
 
-  /* Resize handle */
   .resize-handle {
     position: absolute;
     right: 0; bottom: 0;
@@ -249,7 +244,6 @@
     line-height: 1.8;
   }
 
-  
   .app-music {
     display: flex;
     flex-direction: column;
@@ -305,7 +299,6 @@
     transition: width 0.5s linear;
   }
 
-
   .app-paint { display: flex; flex-direction: column; gap: 8px; }
   .paint-toolbar {
     display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
@@ -335,7 +328,6 @@
   }
   .paint-size input { width: 60px; accent-color: var(--neon-pink); }
 
-  
   .app-terminal {
     font-family: var(--font-mono);
     font-size: 13px;
@@ -375,7 +367,6 @@
     font-family: var(--font-mono);
     font-size: 13px;
   }
-
 
   .app-devlog { display: flex; flex-direction: column; gap: 12px; }
   .devlog-entry {
@@ -433,7 +424,6 @@
   }
   .devlog-save:hover { transform: scale(1.05); }
 
-  /* ABOUT */
   .app-about {
     text-align: center;
     display: flex;
@@ -469,7 +459,6 @@
     margin: 2px;
   }
 
-  
   .spray-dot {
     position: fixed;
     pointer-events: none;
@@ -482,7 +471,6 @@
     to { opacity: 0; transform: scale(0.3); }
   }
 
-  
   .notification {
     position: fixed;
     bottom: 64px;
@@ -507,7 +495,6 @@
     to { transform: translateX(120%); opacity: 0; }
   }
 
-  
   @keyframes glitch {
     0%, 100% { text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-cyan); }
     25% { text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-cyan); }
@@ -517,10 +504,8 @@
 
   .glitch { animation: glitch 2s infinite; }
 
-  
   .window-body { user-select: text; }
 
-  
   #start-menu {
     position: fixed;
     bottom: 60px;
@@ -562,12 +547,9 @@
 </head>
 <body>
 
-
 <div id="wallpaper"><canvas id="bg-canvas"></canvas></div>
 
-
 <div id="desktop"></div>
-
 
 <div id="start-menu">
   <div id="start-menu-title">CHAOSOS</div>
@@ -581,25 +563,17 @@
 </div>
 
 <script>
-
 let windowZ = 200;
 let activeWindow = null;
 const openWindows = {};
 let musicPlaying = false;
 let musicTrack = 0;
-const tracks = [
-  { title: 'Static Discharge', artist: 'Circuit Breaker', emoji: '⚡' },
-  { title: 'Neon Vandal', artist: 'The Spraycans', emoji: '🎨' },
-  { title: 'Concrete Dreams', artist: 'Urban Decay', emoji: '🏙️' },
-  { title: 'Frequency Punk', artist: 'Glitch Sisters', emoji: '📡' },
-];
 let paintColor = '#ff2d78';
 let paintSize = 8;
 let isPainting = false;
 let lastX, lastY;
 let musicInterval = null;
-let musicProgress = 30;
-
+let musicProgress = 0;
 
 const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
@@ -613,7 +587,6 @@ function resizeBg() {
 }
 resizeBg();
 window.addEventListener('resize', resizeBg);
-
 
 const graffLines = [];
 for (let i = 0; i < 18; i++) {
@@ -644,7 +617,6 @@ function drawBg() {
   bgCtx.fillStyle = '#0a0a0a';
   bgCtx.fillRect(0, 0, W, H);
 
- 
   bgCtx.strokeStyle = 'rgba(255,255,255,0.03)';
   bgCtx.lineWidth = 1;
   for (let x = 0; x < W; x += 40) {
@@ -654,7 +626,6 @@ function drawBg() {
     bgCtx.beginPath(); bgCtx.moveTo(0, y); bgCtx.lineTo(W, y); bgCtx.stroke();
   }
 
-  
   graffLines.forEach(l => {
     bgCtx.save();
     bgCtx.globalAlpha = l.alpha;
@@ -672,7 +643,7 @@ function drawBg() {
     bgCtx.restore();
   });
 
-    particles.forEach(p => {
+  particles.forEach(p => {
     p.x += p.vx; p.y += p.vy;
     if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
     if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
@@ -691,7 +662,6 @@ function drawBg() {
 }
 drawBg();
 
-
 function updateClock() {
   const now = new Date();
   document.getElementById('clock').textContent =
@@ -699,7 +669,6 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
-
 
 function notify(msg, color = '#00f5ff') {
   const el = document.createElement('div');
@@ -715,7 +684,6 @@ function notify(msg, color = '#00f5ff') {
     setTimeout(() => el.remove(), 300);
   }, 2500);
 }
-
 
 function createWindow(id, title, content, opts = {}) {
   if (openWindows[id]) {
@@ -747,7 +715,6 @@ function createWindow(id, title, content, opts = {}) {
   document.body.appendChild(win);
   focusWindow(id);
 
-  
   win.querySelector('.close').addEventListener('click', () => closeWindow(id));
   win.querySelector('.minimize').addEventListener('click', () => minimizeWindow(id, win));
   win.querySelector('.maximize').addEventListener('click', () => maximizeWindow(id, win));
@@ -826,7 +793,6 @@ function removeFromTaskbar(id) {
   if (btn) btn.remove();
 }
 
-
 function makeDraggable(win) {
   const titlebar = win.querySelector('.window-titlebar');
   let dragging = false, startX, startY, startLeft, startTop;
@@ -857,7 +823,6 @@ function makeDraggable(win) {
   });
 }
 
-
 function makeResizable(win) {
   const handle = win.querySelector('.resize-handle');
   let resizing = false, startX, startY, startW, startH;
@@ -883,7 +848,6 @@ function openNotepad() {
   createWindow('notepad', '✏️ NOTEPAD.exe', content, { color: '#39ff14', width: 420, height: 300 });
 }
 
-// --- TERMINAL ---
 const terminalHistory = [
   { type: 'sys', text: '██████████████████████████████' },
   { type: 'sys', text: '  CHAOSOS v1.0 — system boot' },
@@ -959,7 +923,6 @@ function appendTermLine(container, text, type = '') {
   container.appendChild(div);
 }
 
-
 function openPaint() {
   const colors = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff','#ff6a00','#ffffff','#000000'];
   const swatches = colors.map(c => `<div class="color-swatch${c === paintColor ? ' selected' : ''}" style="background:${c}" data-color="${c}"></div>`).join('');
@@ -983,7 +946,6 @@ function openPaint() {
       ctx.fillStyle = '#1a1a1a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-   
       const resizeCanvas = () => {
         const body = win.querySelector('.window-body');
         const toolbar = win.querySelector('.paint-toolbar');
@@ -998,7 +960,6 @@ function openPaint() {
       };
       setTimeout(resizeCanvas, 100);
 
-      
       win.querySelectorAll('.color-swatch').forEach(sw => {
         sw.addEventListener('click', () => {
           win.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
@@ -1007,7 +968,6 @@ function openPaint() {
         });
       });
 
-      
       const slider = win.querySelector('#paint-size-slider');
       const sizeVal = win.querySelector('#paint-size-val');
       slider.addEventListener('input', () => {
@@ -1015,7 +975,6 @@ function openPaint() {
         sizeVal.textContent = paintSize;
       });
 
-      
       const getPos = e => {
         const rect = canvas.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -1046,64 +1005,267 @@ function openPaint() {
   });
 }
 
+let audioCtx = null;
+let musicNodes = [];
+let analyserNode = null;
+let eqCanvasAnim = null;
+
+const tracks = [
+  {
+    title: 'Static Discharge', artist: 'Circuit Breaker', emoji: '⚡',
+    color: '#ff2d78',
+    pattern: [
+      [110, 0.18, 'sawtooth'], [147, 0.18, 'sawtooth'], [165, 0.18, 'sawtooth'],
+      [110, 0.18, 'sawtooth'], [131, 0.18, 'square'],   [165, 0.18, 'sawtooth'],
+      [110, 0.36, 'sawtooth'], [147, 0.18, 'square'],   [123, 0.18, 'sawtooth'],
+    ],
+    bpm: 160, distortion: 0.7,
+  },
+  {
+    title: 'Neon Vandal', artist: 'The Spraycans', emoji: '🎨',
+    color: '#bf00ff',
+    pattern: [
+      [196, 0.2, 'square'], [220, 0.2, 'square'], [246, 0.2, 'square'],
+      [196, 0.2, 'square'], [175, 0.2, 'sawtooth'], [196, 0.2, 'square'],
+      [220, 0.4, 'square'], [246, 0.2, 'sawtooth'], [220, 0.2, 'square'],
+    ],
+    bpm: 140, distortion: 0.5,
+  },
+  {
+    title: 'Concrete Dreams', artist: 'Urban Decay', emoji: '🏙️',
+    color: '#00f5ff',
+    pattern: [
+      [87, 0.3, 'sawtooth'], [98, 0.3, 'sawtooth'], [110, 0.3, 'sawtooth'],
+      [87, 0.15, 'square'],  [87, 0.15, 'square'],  [98, 0.3, 'sawtooth'],
+      [87, 0.6, 'sawtooth'], [110, 0.3, 'square'],  [98, 0.3, 'sawtooth'],
+    ],
+    bpm: 120, distortion: 0.9,
+  },
+  {
+    title: 'Frequency Punk', artist: 'Glitch Sisters', emoji: '📡',
+    color: '#39ff14',
+    pattern: [
+      [220, 0.1, 'square'], [247, 0.1, 'square'], [262, 0.1, 'square'],
+      [220, 0.1, 'square'], [196, 0.1, 'sawtooth'],[220, 0.1, 'square'],
+      [247, 0.2, 'square'], [262, 0.1, 'square'],  [247, 0.1, 'square'],
+    ],
+    bpm: 180, distortion: 0.4,
+  },
+];
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyserNode = audioCtx.createAnalyser();
+  analyserNode.fftSize = 64;
+  analyserNode.connect(audioCtx.destination);
+}
+
+function stopMusic() {
+  musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  musicNodes = [];
+  musicPlaying = false;
+  if (eqCanvasAnim) { cancelAnimationFrame(eqCanvasAnim); eqCanvasAnim = null; }
+}
+
+function playTrackLoop(trackIdx, startTime) {
+  if (!audioCtx) return;
+  const track = tracks[trackIdx];
+  const beatDur = 60 / track.bpm;
+
+  function makeDistortion(amount) {
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i * 2) / 256 - 1;
+      curve[i] = ((Math.PI + amount * 100) * x) / (Math.PI + amount * 100 * Math.abs(x));
+    }
+    return curve;
+  }
+
+  let t = startTime;
+  const scheduleAhead = 4;
+
+  function scheduleNotes() {
+    if (!musicPlaying) return;
+    while (t < audioCtx.currentTime + scheduleAhead) {
+      track.pattern.forEach(([freq, dur, type]) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const dist = audioCtx.createWaveShaper();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.linearRampToValueAtTime(freq * (0.98 + Math.random() * 0.04), t + dur * 0.5);
+
+        dist.curve = makeDistortion(track.distortion);
+        dist.oversample = '2x';
+
+        filter.type = 'bandpass';
+        filter.frequency.value = 800 + Math.random() * 400;
+        filter.Q.value = 1.5;
+
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur * 0.9);
+
+        osc.connect(dist);
+        dist.connect(filter);
+        filter.connect(gain);
+        gain.connect(analyserNode);
+
+        osc.start(t);
+        osc.stop(t + dur);
+        musicNodes.push(osc);
+        t += dur * beatDur * 2;
+      });
+    }
+    setTimeout(scheduleNotes, 1500);
+  }
+
+  function scheduleKick() {
+    if (!musicPlaying) return;
+    const kickGain = audioCtx.createGain();
+    const kickOsc = audioCtx.createOscillator();
+    kickOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    kickOsc.frequency.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    kickGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    kickGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    kickOsc.connect(kickGain);
+    kickGain.connect(analyserNode);
+    kickOsc.start(); kickOsc.stop(audioCtx.currentTime + 0.3);
+    musicNodes.push(kickOsc);
+    setTimeout(scheduleKick, (60000 / track.bpm));
+  }
+
+  scheduleNotes();
+  scheduleKick();
+}
 
 function openMusic() {
   const t = tracks[musicTrack];
   const content = `
     <div class="app-music">
-      <div class="music-art" id="music-art">${t.emoji}</div>
+      <canvas id="eq-canvas" width="260" height="80" style="border-radius:6px;background:#0d0d0d;border:1px solid rgba(255,255,255,0.08);display:block;margin:0 auto;"></canvas>
+      <div class="music-art" id="music-art" style="border-color:${t.color};box-shadow:0 0 30px ${t.color}66">${t.emoji}</div>
       <div>
-        <div class="music-title" id="music-title">${t.title}</div>
+        <div class="music-title" id="music-title" style="color:${t.color}">${t.title}</div>
         <div class="music-artist" id="music-artist">${t.artist}</div>
       </div>
-      <div class="progress-bar" id="music-progress-bar">
-        <div class="progress-fill" id="music-fill" style="width:30%"></div>
+      <div class="progress-bar" id="music-progress-bar" style="cursor:default">
+        <div class="progress-fill" id="music-fill" style="width:0%;background:${t.color};box-shadow:0 0 8px ${t.color}"></div>
       </div>
       <div class="music-controls">
-        <button class="music-btn" id="music-prev">⏮</button>
-        <button class="music-play" id="music-play-btn">▶</button>
-        <button class="music-btn" id="music-next">⏭</button>
+        <button class="music-btn" id="music-prev" title="prev track">⏮</button>
+        <button class="music-play" id="music-play-btn" style="background:${t.color}">▶</button>
+        <button class="music-btn" id="music-next" title="next track">⏭</button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.3);text-align:center">
+        🔊 synth-generated punk sounds
       </div>
     </div>`;
+
   createWindow('music', '🎵 MUSIC PLAYER', content, {
-    color: '#ffe600', width: 320, height: 360,
+    color: '#ffe600', width: 320, height: 420,
     onOpen: (win) => {
       const playBtn = win.querySelector('#music-play-btn');
       const art = win.querySelector('#music-art');
       const fill = win.querySelector('#music-fill');
+      const eqCanvas = win.querySelector('#eq-canvas');
+      const eqCtx = eqCanvas.getContext('2d');
+
+      function drawEQ() {
+        eqCanvasAnim = requestAnimationFrame(drawEQ);
+        eqCtx.clearRect(0, 0, eqCanvas.width, eqCanvas.height);
+        eqCtx.fillStyle = '#0d0d0d';
+        eqCtx.fillRect(0, 0, eqCanvas.width, eqCanvas.height);
+
+        if (!analyserNode || !musicPlaying) {
+          eqCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+          eqCtx.lineWidth = 1;
+          eqCtx.beginPath();
+          eqCtx.moveTo(0, eqCanvas.height / 2);
+          eqCtx.lineTo(eqCanvas.width, eqCanvas.height / 2);
+          eqCtx.stroke();
+          return;
+        }
+
+        const data = new Uint8Array(analyserNode.frequencyBinCount);
+        analyserNode.getByteFrequencyData(data);
+        const barW = eqCanvas.width / data.length;
+        const trackColor = tracks[musicTrack].color;
+
+        data.forEach((val, i) => {
+          const h = (val / 255) * eqCanvas.height;
+          const x = i * barW;
+          const grad = eqCtx.createLinearGradient(0, eqCanvas.height, 0, eqCanvas.height - h);
+          grad.addColorStop(0, trackColor + 'aa');
+          grad.addColorStop(1, trackColor);
+          eqCtx.fillStyle = grad;
+          eqCtx.shadowColor = trackColor;
+          eqCtx.shadowBlur = 4;
+          eqCtx.fillRect(x + 1, eqCanvas.height - h, barW - 2, h);
+        });
+      }
+      drawEQ();
 
       playBtn.addEventListener('click', () => {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
         musicPlaying = !musicPlaying;
         playBtn.textContent = musicPlaying ? '⏸' : '▶';
+
         if (musicPlaying) {
           art.classList.add('playing');
+          playTrackLoop(musicTrack, audioCtx.currentTime + 0.1);
           musicInterval = setInterval(() => {
-            musicProgress = (musicProgress + 0.5) % 100;
+            musicProgress = (musicProgress + 0.3) % 100;
             fill.style.width = musicProgress + '%';
-          }, 100);
-          notify(`now playing: ${tracks[musicTrack].title}`, '#ffe600');
+          }, 80);
+          notify(`▶ ${tracks[musicTrack].title}`, tracks[musicTrack].color);
         } else {
           art.classList.remove('playing');
+          stopMusic();
+          musicPlaying = false;
           clearInterval(musicInterval);
         }
       });
 
-      const changeTrack = (dir) => {
-        musicTrack = (musicTrack + dir + tracks.length) % tracks.length;
+      const updateTrackUI = (win) => {
         const t = tracks[musicTrack];
         win.querySelector('#music-title').textContent = t.title;
+        win.querySelector('#music-title').style.color = t.color;
         win.querySelector('#music-artist').textContent = t.artist;
-        art.textContent = t.emoji;
-        musicProgress = 0;
-        if (musicPlaying) notify(`now playing: ${t.title}`, '#ffe600');
+        win.querySelector('#music-art').textContent = t.emoji;
+        win.querySelector('#music-art').style.borderColor = t.color;
+        win.querySelector('#music-art').style.boxShadow = `0 0 30px ${t.color}66`;
+        win.querySelector('#music-play-btn').style.background = t.color;
+        fill.style.background = t.color;
+        fill.style.boxShadow = `0 0 8px ${t.color}`;
       };
 
-      win.querySelector('#music-prev').addEventListener('click', () => changeTrack(-1));
-      win.querySelector('#music-next').addEventListener('click', () => changeTrack(1));
+      win.querySelector('#music-prev').addEventListener('click', () => {
+        stopMusic(); musicPlaying = false;
+        musicTrack = (musicTrack - 1 + tracks.length) % tracks.length;
+        musicProgress = 0; fill.style.width = '0%';
+        updateTrackUI(win);
+        clearInterval(musicInterval);
+        win.querySelector('#music-play-btn').textContent = '▶';
+        art.classList.remove('playing');
+      });
+
+      win.querySelector('#music-next').addEventListener('click', () => {
+        stopMusic(); musicPlaying = false;
+        musicTrack = (musicTrack + 1) % tracks.length;
+        musicProgress = 0; fill.style.width = '0%';
+        updateTrackUI(win);
+        clearInterval(musicInterval);
+        win.querySelector('#music-play-btn').textContent = '▶';
+        art.classList.remove('playing');
+      });
     }
   });
 }
-
 
 let devlogs = [
   { date: '2025-06-01', title: 'initial commit 🔥', body: 'Started building CHAOSOS. Got basic window dragging working. The vibe is immaculate.', color: '#ff2d78' },
@@ -1133,25 +1295,28 @@ function openDevlog() {
   createWindow('devlog', '📓 DEVLOG', renderDevlog(), {
     color: '#00f5ff', width: 420, height: 400,
     onOpen: (win) => {
-      win.querySelector('#devlog-save-btn').addEventListener('click', () => {
-        const title = win.querySelector('#devlog-new-title').value.trim();
-        const body = win.querySelector('#devlog-new-body').value.trim();
-        if (!title || !body) { notify('fill in both fields!', '#ff2d78'); return; }
-        const colors = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff'];
-        devlogs.push({
-          date: new Date().toISOString().slice(0, 10),
-          title, body,
-          color: colors[Math.floor(Math.random() * colors.length)]
+      function bindSaveBtn() {
+        const btn = win.querySelector('#devlog-save-btn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          const title = win.querySelector('#devlog-new-title').value.trim();
+          const body = win.querySelector('#devlog-new-body').value.trim();
+          if (!title || !body) { notify('fill in both fields!', '#ff2d78'); return; }
+          const colors = ['#ff2d78','#ffe600','#00f5ff','#39ff14','#bf00ff'];
+          devlogs.push({
+            date: new Date().toISOString().slice(0, 10),
+            title, body,
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+          win.querySelector('.window-body').innerHTML = renderDevlog();
+          bindSaveBtn();
+          notify('devlog saved! ✅', '#39ff14');
         });
-        win.querySelector('.window-body').innerHTML = renderDevlog();
-        // re-bind
-        win.querySelector('#devlog-save-btn').addEventListener('click', arguments.callee);
-        notify('log saved! ✅', '#39ff14');
-      });
+      }
+      bindSaveBtn();
     }
   });
 }
-
 
 function openAbout() {
   const content = `
@@ -1177,7 +1342,6 @@ function openAbout() {
     color: '#ff6a00', width: 340, height: 380
   });
 }
-
 
 const desktopApps = [
   { id: 'notepad', label: 'NOTEPAD', emoji: '✏️', color: '#39ff14', open: openNotepad },
@@ -1205,23 +1369,21 @@ desktopApps.forEach(app => {
   desktop.appendChild(icon);
 });
 
-
-const startMenu = document.getElementById('start-menu');
+const startMenuEl = document.getElementById('start-menu');
 desktopApps.forEach(app => {
   const item = document.createElement('div');
   item.className = 'start-item';
   item.innerHTML = `<span>${app.emoji}</span>${app.label}`;
   item.style.color = app.color;
-  item.addEventListener('click', () => { app.open(); startMenu.classList.remove('visible'); });
-  startMenu.appendChild(item);
+  item.addEventListener('click', () => { app.open(); startMenuEl.classList.remove('visible'); });
+  startMenuEl.appendChild(item);
 });
 
 document.getElementById('start-btn').addEventListener('click', (e) => {
-  startMenu.classList.toggle('visible');
+  startMenuEl.classList.toggle('visible');
   e.stopPropagation();
 });
-document.addEventListener('click', () => startMenu.classList.remove('visible'));
-
+document.addEventListener('click', () => startMenuEl.classList.remove('visible'));
 
 setTimeout(() => notify('CHAOSOS booted. stay chaotic ⚡', '#ffe600'), 500);
 setTimeout(() => notify('double-click icons to open apps', '#00f5ff'), 1800);
