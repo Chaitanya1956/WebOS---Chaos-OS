@@ -1,4 +1,4 @@
-# ⚡ CHAOSOS — A WebOS for the Restless
+#  CHAOSOS — A WebOS for the Restless
 
 A single-file, browser-based operating system with draggable windows, a working synth music player, a spray paint app, a terminal, and zero passwords. Built for the WebOS 1 mission.
 
@@ -17,7 +17,7 @@ No install, no build step, no dependencies.
 
 ---
 
-## 🖥️ Apps
+##  Apps
 
 | App | Icon | What it does |
 |---|---|---|
@@ -30,7 +30,7 @@ No install, no build step, no dependencies.
 
 ---
 
-## 🎮 Controls & Behavior
+##  Controls & Behavior
 
 - **Drag** any window by its titlebar
 - **Resize** from the bottom-right corner handle
@@ -88,5 +88,9 @@ webos.html   ← everything. one file. that's the whole project.
 
 (Full logs live inside the app itself — open 📓 Devlog to read and add more.)
 
+
+##  AI Usage Declaration
+ 
+Parts of this project — like the synth audio engine, and this README — were built with the help of an AI assistant (Gemini). All AI-assisted output was reviewed, tested, and edited by hand before being included in the final submission. Everything else including Concept, direction, theming, and final polish are my own.
 ---
 
